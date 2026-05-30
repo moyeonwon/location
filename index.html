@@ -16,6 +16,7 @@
         input, select { padding: 10px; width: 220px; border: 1px solid #ccd1d9; border-radius: 6px; font-size: 14px; box-sizing: border-box; background-color: #fff; }
         input:focus, select:focus { border-color: #3498db; outline: none; }
         
+        /* 버튼 그룹 스타일 정의 */
         .btn-group { margin-top: 20px; display: flex; flex-wrap: wrap; gap: 10px; }
         
         button { 
@@ -169,8 +170,8 @@
         let coordData = {};        
         let allColorSet = new Set(); 
 
-        const OWNER = "moyeonwon";
-        const REPO = "location";
+        const OWNER = "moyeonwon";    // 깃허브 아이디
+        const REPO = "work";     // 저장소(Repository) 이름
         
         const T_1 = "ghp_QCkeOEuALhBV3EMe"; 
         const T_2 = "0YKZmUI29V2UXp47VQ24";
@@ -187,7 +188,7 @@
             .then(buffer => {
                 const text = decodeBufferAuto(buffer);
                 parseCoordinateCSV(text);
-                return fetch(`https:api.github.com/repos/${OWNER}/${REPO}/contents/data.csv?v=${Date.now()}`, {
+                return fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/data.csv?v=${Date.now()}`, {
                     headers: { "Authorization": G_AUTH, "Accept": "application/vnd.github.v3.raw" }
                 });
             })
@@ -238,7 +239,7 @@
                     }
                     const base64Content = btoa(binary);
 
-                    const url = `https:api.github.com/repos/${OWNER}/${REPO}/contents/data.csv`;
+                    const url = `https://api.github.com/repos/${OWNER}/${REPO}/contents/data.csv`;
                     
                     const getRes = await fetch(url, { headers: { "Authorization": G_AUTH } });
                     let sha = "";
@@ -432,7 +433,7 @@
             document.getElementById('baseLocationSearch').value = ''; document.getElementById('modelSearch').value = '';
             updateDropdown(""); updateColorDropdown(""); document.getElementById('resultBody').innerHTML = '';
             document.getElementById('tableContainer').style.display = 'none'; document.getElementById('noResult').style.display = 'none';
-            document.getElementById('dataFile').value = ''; 
+            document.getElementById('dataFile').value = ''; // 파일 인풋도 비워줌
         }
     </script>
 </body>
