@@ -9,18 +9,13 @@
         h1 { color: #2c3e50; font-size: 24px; margin-bottom: 20px; }
         .search-box { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 20px; }
         
-        /* 기본 PC 레이아웃 */
         .search-row { margin-bottom: 15px; display: flex; flex-wrap: wrap; gap: 15px; }
         .input-group { display: flex; flex-direction: column; }
         
         label { font-size: 13px; color: #7f8c8d; margin-bottom: 5px; font-weight: bold; }
         input, select { padding: 10px; width: 220px; border: 1px solid #ccd1d9; border-radius: 6px; font-size: 14px; box-sizing: border-box; background-color: #fff; }
         input:focus, select:focus { border-color: #3498db; outline: none; }
-        
-        /* 버튼 그룹 레이아웃 */
         .btn-group { margin-top: 20px; display: flex; flex-wrap: wrap; gap: 10px; }
-        
-        /* PC 버튼 크기 (120px 고정) */
         button { 
             width: 120px;
             padding: 12px 0; 
@@ -41,32 +36,29 @@
         .btn-upload { background-color: #2ecc71; }
         .btn-upload:hover { background-color: #27ae60; }
 
-        /* 모바일 환경 반응형 스타일 */
         @media screen and (max-width: 480px) {
-            /* 1. 입력창 영역 한 줄 정렬 설정 */
             .search-row { 
                 display: flex;
-                flex-wrap: nowrap; /* 줄바꿈 방지 */
-                gap: 8px;          /* 좌우 간격 축소 */
+                flex-wrap: nowrap; 
+                gap: 8px;          
                 margin-bottom: 10px;
             }
             .input-group { 
-                flex: 1;           /* 반반씩 균등하게 너비 배분 */
-                min-width: 0;      /* flex 아이템 자름 방지 */
+                flex: 1;           
+                min-width: 0;      
             }
             input, select { 
-                width: 100%;       /* 할당된 너비에 꽉 차게 */
-                padding: 10px 5px; /* 모바일 대응 내부 여백 조절 */
+                width: 100%;       
+                padding: 10px 5px; 
                 font-size: 13px; 
             }
             label { 
-                font-size: 11px;   /* 라벨 글자 크기 축소 */
+                font-size: 11px;   
                 white-space: nowrap; 
                 overflow: hidden;
-                text-overflow: ellipsis; /* 글자가 너무 길면 ... 처리 */
+                text-overflow: ellipsis; 
             }
 
-            /* 2. 버튼 영역 한 줄 정렬 설정 */
             .btn-group { 
                 flex-wrap: nowrap; 
                 gap: 5px;          
