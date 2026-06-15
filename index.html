@@ -53,7 +53,7 @@
             input, select { 
                 width: 100%;       
                 padding: 10px 5px; 
-                font-size: 13px; 
+                font-size: 13px;   
             }
             label { 
                 font-size: 11px;   
@@ -230,8 +230,9 @@
                 
                 try {
                     const debugEl = document.getElementById('debugBox');
-                    debugEl.innerHTML = "⏳ 서버 원본 데이터 동기화 중...";
+                    debugEl.innerHTML = "⏳ 서버 원본 데이터 백업 및 동기화 중...";
 
+                    // 1. 신규 업로드용 콘텐츠 Base64 변환
                     const bytes = new Uint8Array(buffer);
                     let binary = '';
                     for (let i = 0; i < bytes.byteLength; i++) {
@@ -241,18 +242,54 @@
 
                     const url = `https://api.github.com/repos/${OWNER}/${REPO}/contents/data.csv`;
                     
+                    // 2. 기존 data.csv 정보 조회 (백업 및 SHA 획득용)
                     const getRes = await fetch(url, { headers: { "Authorization": G_AUTH } });
                     let sha = "";
+                    
                     if (getRes.ok) {
                         const fileInfo = await getRes.json();
-                        sha = fileInfo.sha;
+                        sha = fileInfo.sha; // 기존 파일의 고유 SHA 값
+                        const oldContent = fileInfo.content; // 기존 파일의 Base64 데이터
+
+                        // 3. 한국 시간(KST) 기준 파일명 생성을 위한 날짜 포맷팅 (YYYYMMDD_HHMMSS)
+                        const now = new Date();
+                        const kstOffset = 9 * 60 * 60 * 1000; // KST는 UTC+9
+                        const kstDate = new Date(now.getTime() + kstOffset);
+                        
+                        const yyyy = kstDate.getUTCFullYear();
+                        const mm = String(kstDate.getUTCMonth() + 1).padStart(2, '0');
+                        const dd = String(kstDate.getUTCDate()).padStart(2, '0');
+                        const hh = String(kstDate.getUTCHours()).padStart(2, '0');
+                        const mi = String(kstDate.getUTCMinutes()).padStart(2, '0');
+                        const ss = String(kstDate.getUTCSeconds()).padStart(2, '0');
+                        
+                        const backupFileName = `data_${yyyy}${mm}${dd}_${hh}${mi}${ss}.csv`;
+                        const backupUrl = `https://api.github.com/repos/${OWNER}/${REPO}/contents/backup/${backupFileName}`;
+
+                        // 4. 기존 데이터를 backup/ 폴더 내에 다른 이름으로 먼저 백업 저장
+                        debugEl.innerHTML = `⏳ 기존 데이터를 백업하는 중... (${backupFileName})`;
+                        const backupRes = await fetch(backupUrl, {
+                            method: "PUT",
+                            headers: { "Authorization": G_AUTH, "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                                message: `[백업] 신규 업로드 전 기존 데이터 백업 (${backupFileName})`,
+                                content: oldContent // 기존 데이터 내용 그대로 복사
+                            })
+                        });
+
+                        if (!backupRes.ok) {
+                            const backupErr = await backupRes.json();
+                            throw new Error(`백업 실패: ${backupErr.message}`);
+                        }
                     }
 
+                    // 5. 원래의 data.csv 위치에 새 데이터 덮어쓰기
+                    debugEl.innerHTML = "⏳ 새 데이터를 서버에 반영하는 중...";
                     const putRes = await fetch(url, {
                         method: "PUT",
                         headers: { "Authorization": G_AUTH, "Content-Type": "application/json" },
                         body: JSON.stringify({
-                            message: "재고 데이터 웹 UI 업로드 덮어쓰기",
+                            message: "재고 데이터 웹 UI 업로드 덮어쓰기 (백업 완료)",
                             content: base64Content,
                             sha: sha
                         })
@@ -260,7 +297,7 @@
 
                     if (putRes.ok) {
                         updateDebugStatus();
-                        alert("✅ 서버 파일 교체 완료! 변경된 재고로 조회됩니다.");
+                        alert("✅ 기존 데이터 백업 및 신규 파일 교체가 완료되었습니다!");
                     } else {
                         const errData = await putRes.json();
                         throw new Error(errData.message);
@@ -433,7 +470,7 @@
             document.getElementById('baseLocationSearch').value = ''; document.getElementById('modelSearch').value = '';
             updateDropdown(""); updateColorDropdown(""); document.getElementById('resultBody').innerHTML = '';
             document.getElementById('tableContainer').style.display = 'none'; document.getElementById('noResult').style.display = 'none';
-            document.getElementById('dataFile').value = ''; // 파일 인풋도 비워줌
+            document.getElementById('dataFile').value = ''; 
         }
     </script>
 </body>
