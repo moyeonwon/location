@@ -16,7 +16,6 @@
         input, select { padding: 10px; width: 220px; border: 1px solid #ccd1d9; border-radius: 6px; font-size: 14px; box-sizing: border-box; background-color: #fff; }
         input:focus, select:focus { border-color: #3498db; outline: none; }
         
-        /* 버튼 그룹 스타일 정의 */
         .btn-group { margin-top: 20px; display: flex; flex-wrap: wrap; gap: 10px; }
         
         button { 
@@ -170,8 +169,8 @@
         let coordData = {};        
         let allColorSet = new Set(); 
 
-        const OWNER = "moyeonwon";    // 깃허브 아이디
-        const REPO = "location";     // 저장소(Repository) 이름
+        const OWNER = "moyeonwon";    
+        const REPO = "location";     
         
         const T_1 = "ghp_QCkeOEuALhBV3EMe"; 
         const T_2 = "0YKZmUI29V2UXp47VQ24";
@@ -232,7 +231,6 @@
                     const debugEl = document.getElementById('debugBox');
                     debugEl.innerHTML = "⏳ 서버 원본 데이터 백업 및 동기화 중...";
 
-                    // 1. 신규 업로드용 콘텐츠 Base64 변환
                     const bytes = new Uint8Array(buffer);
                     let binary = '';
                     for (let i = 0; i < bytes.byteLength; i++) {
@@ -242,18 +240,16 @@
 
                     const url = `https://api.github.com/repos/${OWNER}/${REPO}/contents/data.csv`;
                     
-                    // 2. 기존 data.csv 정보 조회 (백업 및 SHA 획득용)
                     const getRes = await fetch(url, { headers: { "Authorization": G_AUTH } });
                     let sha = "";
                     
                     if (getRes.ok) {
                         const fileInfo = await getRes.json();
-                        sha = fileInfo.sha; // 기존 파일의 고유 SHA 값
-                        const oldContent = fileInfo.content; // 기존 파일의 Base64 데이터
+                        sha = fileInfo.sha; 
+                        const oldContent = fileInfo.content; 
 
-                        // 3. 한국 시간(KST) 기준 파일명 생성을 위한 날짜 포맷팅 (YYYYMMDD_HHMMSS)
                         const now = new Date();
-                        const kstOffset = 9 * 60 * 60 * 1000; // KST는 UTC+9
+                        const kstOffset = 9 * 60 * 60 * 1000; 
                         const kstDate = new Date(now.getTime() + kstOffset);
                         
                         const yyyy = kstDate.getUTCFullYear();
@@ -266,14 +262,13 @@
                         const backupFileName = `data_${yyyy}${mm}${dd}_${hh}${mi}${ss}.csv`;
                         const backupUrl = `https://api.github.com/repos/${OWNER}/${REPO}/contents/backup/${backupFileName}`;
 
-                        // 4. 기존 데이터를 backup/ 폴더 내에 다른 이름으로 먼저 백업 저장
                         debugEl.innerHTML = `⏳ 기존 데이터를 백업하는 중... (${backupFileName})`;
                         const backupRes = await fetch(backupUrl, {
                             method: "PUT",
                             headers: { "Authorization": G_AUTH, "Content-Type": "application/json" },
                             body: JSON.stringify({
                                 message: `[백업] 신규 업로드 전 기존 데이터 백업 (${backupFileName})`,
-                                content: oldContent // 기존 데이터 내용 그대로 복사
+                                content: oldContent 
                             })
                         });
 
@@ -283,7 +278,6 @@
                         }
                     }
 
-                    // 5. 원래의 data.csv 위치에 새 데이터 덮어쓰기
                     debugEl.innerHTML = "⏳ 새 데이터를 서버에 반영하는 중...";
                     const putRes = await fetch(url, {
                         method: "PUT",
