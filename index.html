@@ -52,7 +52,7 @@
             input, select { 
                 width: 100%;       
                 padding: 10px 5px; 
-                font-size: 13px;   
+                font-size: 13px; 
             }
             label { 
                 font-size: 11px;   
@@ -168,6 +168,7 @@
         let csvData = [];          
         let coordData = {};        
         let allColorSet = new Set(); 
+        let lastUpdatedTime = "";
 
         const OWNER = "moyeonwon";    
         const REPO = "location";     
@@ -187,6 +188,22 @@
             .then(buffer => {
                 const text = decodeBufferAuto(buffer);
                 parseCoordinateCSV(text);
+                
+                return fetch(`https://api.github.com/repos/${OWNER}/${REPO}/commits?path=data.csv&per_page=1`, {
+                    headers: { "Authorization": G_AUTH }
+                });
+            })
+            .then(res => {
+                if (res.ok) {
+                    return res.json().then(commits => {
+                        if (commits && commits.length > 0) {
+                            const commitDate = new Date(commits[0].commit.committer.date);
+                            lastUpdatedTime = formatDate(commitDate);
+                        }
+                    });
+                }
+            })
+            .then(() => {
                 return fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/data.csv?v=${Date.now()}`, {
                     headers: { "Authorization": G_AUTH, "Accept": "application/vnd.github.v3.raw" }
                 });
@@ -290,6 +307,7 @@
                     });
 
                     if (putRes.ok) {
+                        lastUpdatedTime = formatDate(new Date());
                         updateDebugStatus();
                         alert("✅ 기존 데이터 백업 및 신규 파일 교체가 완료되었습니다!");
                     } else {
@@ -299,7 +317,7 @@
 
                 } catch (error) {
                     console.error(error);
-                    showErrorStatus(`서버 저장 실패: ${error.message}`);
+                    showErrorStatus(`서ざ 저장 실패: ${error.message}`);
                 }
             };
             reader.readAsArrayBuffer(file);
@@ -320,13 +338,24 @@
             return new TextDecoder(encoding).decode(buffer);
         }
 
+        function formatDate(date) {
+            const yyyy = date.getFullYear();
+            const mm = String(date.getMonth() + 1).padStart(2, '0');
+            const dd = String(date.getDate()).padStart(2, '0');
+            const hh = String(date.getHours()).padStart(2, '0');
+            const min = String(date.getMinutes()).padStart(2, '0');
+            const ss = String(date.getSeconds()).padStart(2, '0');
+            return `${yyyy}-${mm}-${dd} ${hh}:${min}:${ss}`;
+        }
+
         function updateDebugStatus() {
-            const coordCount = Object.keys(coordData).length;
             const debugEl = document.getElementById('debugBox');
             debugEl.style.backgroundColor = '#e8f8f5';
             debugEl.style.borderColor = '#a3e4d7';
             debugEl.style.color = '#117a65';
-            debugEl.innerHTML = `✅ 데이터 연동 완료! (등록된 판매처: ${coordCount}곳 / 등록된 재고: ${csvData.length}건)`;
+            
+            const timeDisplay = lastUpdatedTime ? lastUpdatedTime : "시간 정보 없음";
+            debugEl.innerHTML = `데이터 업데이트 일시: ${timeDisplay}`;
         }
 
         function showErrorStatus(message) {
