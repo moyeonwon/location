@@ -317,7 +317,7 @@
 
                 } catch (error) {
                     console.error(error);
-                    showErrorStatus(`서ざ 저장 실패: ${error.message}`);
+                    showErrorStatus(`서버 저장 실패: ${error.message}`);
                 }
             };
             reader.readAsArrayBuffer(file);
@@ -355,7 +355,7 @@
             debugEl.style.color = '#117a65';
             
             const timeDisplay = lastUpdatedTime ? lastUpdatedTime : "시간 정보 없음";
-            debugEl.innerHTML = `데이터 업데이트 일시: ${timeDisplay}`;
+            debugEl.innerHTML = `✅ 데이터 업데이트 일시: ${timeDisplay}`;
         }
 
         function showErrorStatus(message) {
